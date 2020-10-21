@@ -13,16 +13,21 @@ struct EmojiMemoryGameView: View {
     @ObservedObject var viewModel:EmojiMemoryGame
     
     var body: some View {
-              Grid(items: viewModel.cards, viewForItem:{ card in
+        VStack{
+            Grid(items: viewModel.cards, viewForItem:{ card in
                 CardView(card: card).onTapGesture {
                     self.viewModel.choose(card: card)
                 }
-              .padding(5)
+                .padding(5)
             })
-        
-            .padding()
-            .foregroundColor(Color.orange)
-            .font(.largeTitle)
+                
+                .padding()
+                .foregroundColor(Color.orange)
+            
+            Button(action: {
+                self.viewModel.resetGame()
+            }, label: {Text("New Game")})
+        }
     }
 }
 
@@ -30,28 +35,38 @@ struct CardView:View {
     var card:MemoryGame<String>.Card
     
     var body:some View{
-        GeometryReader { geometry  in
-            ZStack (content:{
-                if self.card.isFaceUp{
-                    RoundedRectangle(cornerRadius: self.cornerRadius).fill(Color.white)
-                    RoundedRectangle(cornerRadius: self.cornerRadius).stroke(lineWidth: self.edgeLineWidth)
-                    Text(self.card.content)
-                }
-                else{
-                    if !self.card.isMatched{
-                    RoundedRectangle(cornerRadius: self.cornerRadius).fill()
-                    }
-                }
-            })
-                .font(Font.system(size:self.fontSize(for: geometry.size)))
+        
+        GeometryReader { geometry   in
+            self.zBody(for: geometry.size)
         }
+        
+        
+    }
+    
+    @ViewBuilder
+    private func zBody(for size:CGSize) -> some View {
+        
+        if (card.isFaceUp || !card.isMatched) {
+            
+            return ZStack  {
+                
+                Pie(startAngle: Angle.degrees(0-90), endAngle: Angle.degrees(110-90), clockwise: true)
+                    .padding(5)
+                    .opacity(0.7)
+                
+                Text(card.content).font(Font.system(size: fontSize(for: size)))
+                //                .rotationEffect(Angle.degrees(card.isMatched ? 360:0))
+                //                .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false))
+                
+            }.cardify(isFaceUp: card.isFaceUp)
+        }
+        
     }
     
     //MARK: Drawing constants
-    let cornerRadius:CGFloat = 10.0
-    let edgeLineWidth:CGFloat = 3.0
+    
     func fontSize(for size:CGSize) -> CGFloat {
-        min(size.width, size.height) * 0.75
+        min(size.width, size.height) * 0.7
     }
 }
 
