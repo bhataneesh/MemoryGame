@@ -1,2 +1,2 @@
 # MemoryGame
-Card Game using SwiftUI
+Card Game using SwiftUI MVVM Architecture
